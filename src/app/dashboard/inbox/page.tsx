@@ -166,7 +166,8 @@ export default function InboxPage() {
   const [burstEmojis, setBurstEmojis] = useState<string | null>(null);
 
 
-  const notificationsQuery = user ? query(collection(firestore, `users/${user.uid}/notifications`), orderBy('createdAt', 'desc')) : null;
+  const notificationsCol = user ? (collection(firestore, `users/${user.uid}/notifications`) as CollectionReference<Notification>) : null;
+  const notificationsQuery = user && notificationsCol ? query(notificationsCol, orderBy('createdAt', 'desc')) : null;
   const { data: notifications, loading: notificationsLoading } = useCollection<Notification>(notificationsQuery);
   
   const handleNewBadgeReceived = (emojis: string) => {
