@@ -15,6 +15,7 @@ import { AppUser } from '@/firebase/auth/use-user';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { collection, query, orderBy, doc, updateDoc, writeBatch, serverTimestamp, runTransaction, getDoc, getDocs } from 'firebase/firestore';
+import type { CollectionReference } from 'firebase/firestore';
 import { EmojiBurst } from '@/components/effects/emoji-burst';
 
 
@@ -43,10 +44,12 @@ type EnrichedNotification = Notification & {
 function NotificationItem({ notification, onSendCode, onNewBadgeReceived }: { notification: EnrichedNotification; onSendCode: (badgeId: string, toUserId: string, toUserName: string) => Promise<void>, onNewBadgeReceived: (emojis: string) => void }) {
   const firestore = useFirestore();
   const [isSending, setIsSending] = useState(false);
-  const fromUserRef = notification.fromUserId ? doc(firestore, 'users', notification.fromUserId) : null;
+  const usersCol = collection(firestore, 'users') as CollectionReference<AppUser>;
+  const fromUserRef = notification.fromUserId ? doc(usersCol, notification.fromUserId) : null;
   const { data: fromUser, loading: loadingUser } = useDoc<AppUser>(fromUserRef);
 
-  const badgeRef = notification.badgeId ? doc(firestore, 'badges', notification.badgeId) : null;
+  const badgesCol = collection(firestore, 'badges') as CollectionReference<Badge>;
+  const badgeRef = notification.badgeId ? doc(badgesCol, notification.badgeId) : null;
   const { data: badge, loading: loadingBadge } = useDoc<Badge>(badgeRef);
   
   useEffect(() => {
