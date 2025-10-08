@@ -61,23 +61,26 @@ export function TrendingBadges() {
             
             const badgesWithDetails = await Promise.all(
                 badgesSnap.docs.map(async (badgeDoc) => {
-                    const badgeData = { id: badgeDoc.id, ...badgeDoc.data() };
+                    const badgeData = { id: badgeDoc.id, ...badgeDoc.data() } as { id: string; name?: string; emojis?: string; tokens?: number; creatorId?: string };
 
                     const followersRef = collection(firestore, `badges/${badgeDoc.id}/followers`);
                     const ownersRef = collection(firestore, `badges/${badgeDoc.id}/owners`);
-                    const creatorRef = doc(firestore, 'users', badgeData.creatorId);
+                    const creatorId = badgeData.creatorId;
+                    const creatorRef = creatorId ? doc(firestore, 'users', creatorId) : null;
 
-                    const [followersSnap, ownersSnap, creatorSnap] = await Promise.all([
+                    const [followersSnap, ownersSnap, maybeCreatorSnap] = await Promise.all([
                         getDocs(followersRef),
                         getDocs(ownersRef),
-                        getDoc(creatorRef)
+                        creatorRef ? getDoc(creatorRef) : Promise.resolve(null as any)
                     ]);
+
+                    const creatorSnap = maybeCreatorSnap as ReturnType<typeof getDoc> extends Promise<infer T> ? T | null : any;
 
                     return {
                         ...badgeData,
                         followers: followersSnap.docs.map(d => d.data()),
                         owners: ownersSnap.docs.map(d => d.data()),
-                        creator: creatorSnap.exists() ? creatorSnap.data() : null,
+                        creator: creatorSnap && creatorSnap.exists ? (creatorSnap.exists() ? creatorSnap.data() : null) : null,
                     };
                 })
             );
