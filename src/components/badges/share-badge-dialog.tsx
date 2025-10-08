@@ -116,8 +116,8 @@ export function ShareBadgeDialog({ open, onOpenChange, badge, user }: ShareBadge
             <Button 
                 variant="outline" 
                 onClick={handleCreateLinks} 
-                disabled={isCreating || (availableLinks && availableLinks.length > 0)}
-                title={availableLinks && availableLinks.length > 0 ? "You must use your existing codes first." : "Generate 5 new codes"}
+                disabled={isCreating || ((availableLinks?.length ?? 0) > 0)}
+                title={(availableLinks?.length ?? 0) > 0 ? "You must use your existing codes first." : "Generate 5 new codes"}
             >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 {isCreating ? "Generating..." : "Generate 5 More"}
