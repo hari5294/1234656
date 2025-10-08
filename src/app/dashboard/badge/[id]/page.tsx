@@ -17,6 +17,7 @@ import { AppUser } from '@/firebase/auth/use-user';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { doc, collection, writeBatch, serverTimestamp, deleteDoc, setDoc, addDoc, query, where, getDocs, getDoc } from 'firebase/firestore';
+import type { CollectionReference } from 'firebase/firestore';
 import { EmojiBurst } from '@/components/effects/emoji-burst';
 
 type BadgeType = {
@@ -183,7 +184,8 @@ function BadgeDetailContent() {
   const { user: currentUser, loading: authLoading } = useUser();
   
   const id = params.id as string;
-  const badgeRef = doc<Omit<BadgeType, 'id'>>(firestore, 'badges', id);
+  const badgeCol = collection(firestore, 'badges') as CollectionReference<Omit<BadgeType, 'id'>>;
+  const badgeRef = doc(badgeCol, id);
   const { data: badge, loading: badgeLoading } = useDoc<Omit<BadgeType, 'id'>>(badgeRef);
 
   const ownersRef = collection(firestore, `badges/${id}/owners`);
@@ -193,7 +195,8 @@ function BadgeDetailContent() {
   const { data: followers, loading: followersLoading } = useCollection(followersRef);
   
   const creatorId = badge?.creatorId;
-  const creatorRef = creatorId ? doc<AppUser>(firestore, 'users', creatorId) : null;
+  const usersCol = collection(firestore, 'users') as CollectionReference<AppUser>;
+  const creatorRef = creatorId ? doc(usersCol, creatorId) : null;
   const { data: creator, loading: creatorLoading } = useDoc<AppUser>(creatorRef);
 
 
