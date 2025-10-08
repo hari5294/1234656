@@ -183,7 +183,7 @@ function BadgeDetailContent() {
   const { user: currentUser, loading: authLoading } = useUser();
   
   const id = params.id as string;
-  const badgeRef = doc(firestore, 'badges', id);
+  const badgeRef = doc<Omit<BadgeType, 'id'>>(firestore, 'badges', id);
   const { data: badge, loading: badgeLoading } = useDoc<Omit<BadgeType, 'id'>>(badgeRef);
 
   const ownersRef = collection(firestore, `badges/${id}/owners`);
@@ -193,7 +193,7 @@ function BadgeDetailContent() {
   const { data: followers, loading: followersLoading } = useCollection(followersRef);
   
   const creatorId = badge?.creatorId;
-  const creatorRef = creatorId ? doc(firestore, 'users', creatorId) : null;
+  const creatorRef = creatorId ? doc<AppUser>(firestore, 'users', creatorId) : null;
   const { data: creator, loading: creatorLoading } = useDoc<AppUser>(creatorRef);
 
 
