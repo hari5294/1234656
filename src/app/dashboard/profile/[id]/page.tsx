@@ -15,6 +15,7 @@ import { useUser, useDoc, firestore } from '@/firebase';
 import { EditProfileDialog } from '@/components/profile/edit-profile-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { collection, query, where, doc, getDocs, getDoc, updateDoc, arrayUnion, arrayRemove, collectionGroup } from 'firebase/firestore';
+import type { CollectionReference } from 'firebase/firestore';
 import { AppUser } from '@/firebase/auth/use-user';
 // Local Badge type to avoid relying on missing '@/docs/backend-schema'
 type BadgeType = {
@@ -289,7 +290,8 @@ export default function UserProfilePage() {
   const params = useParams();
   const userId = params.id as string;
   
-  const userRef = userId ? doc(firestore, 'users', userId) : null;
+  const usersCol = collection(firestore, 'users') as CollectionReference<AppUser>;
+  const userRef = userId ? doc(usersCol, userId) : null;
   const { data: userProfile, loading: profileLoading } = useDoc<AppUser>(userRef);
 
   const isLoading = authLoading || profileLoading;
