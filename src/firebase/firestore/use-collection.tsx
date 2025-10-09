@@ -43,7 +43,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
     );
 
     return () => unsubscribe();
-  }, [query ? query.path : '']); // Re-run effect if query path changes
+  }, [query]); // Re-run effect if query object changes
 
   return { data, loading, error };
 }
