@@ -225,7 +225,8 @@ function BadgeDetailContent() {
     }
   }, [searchParams, badge, id]);
 
-  const isLoading = authLoading || badgeLoading || ownersLoading || followersLoading || creatorLoading;
+  // Only wait for essential data (auth, badge, creator) - don't block on owners/followers
+  const isLoading = authLoading || badgeLoading || creatorLoading;
   
   // Add debugging for all loading states
   console.log('BadgeDetailContent: authLoading =', authLoading);
