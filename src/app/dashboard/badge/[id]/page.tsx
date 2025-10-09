@@ -37,7 +37,7 @@ type UserProfile = {
 
 function BadgeOwners({ badgeId, creatorId }: { badgeId: string, creatorId: string }) {
     const ownersRef = collection(firestore, `badges/${badgeId}/owners`);
-    const { data: owners, loading } = useCollection(ownersRef);
+    const { data: owners, loading, error } = useCollection(ownersRef);
     const [ownerProfiles, setOwnerProfiles] = useState<UserProfile[]>([]);
     const [loadingProfiles, setLoadingProfiles] = useState(true);
 
@@ -69,6 +69,24 @@ function BadgeOwners({ badgeId, creatorId }: { badgeId: string, creatorId: strin
                 <CardContent className="space-y-4">
                     <Skeleton className="h-12 w-full" />
                     <Skeleton className="h-12 w-full" />
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (error) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                        <Crown className="h-6 w-6" />
+                        Owners
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                        Unable to load owners. Please check your permissions.
+                    </p>
                 </CardContent>
             </Card>
         )
@@ -109,7 +127,7 @@ function BadgeOwners({ badgeId, creatorId }: { badgeId: string, creatorId: strin
 
 function BadgeFollowers({ badgeId }: { badgeId: string }) {
     const followersRef = collection(firestore, `badges/${badgeId}/followers`);
-    const { data: followers, loading } = useCollection(followersRef);
+    const { data: followers, loading, error } = useCollection(followersRef);
     const [followerProfiles, setFollowerProfiles] = useState<UserProfile[]>([]);
     const [loadingProfiles, setLoadingProfiles] = useState(true);
 
@@ -141,6 +159,24 @@ function BadgeFollowers({ badgeId }: { badgeId: string }) {
                 <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
                 <CardContent className="space-y-4">
                     <Skeleton className="h-12 w-full" />
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (error) {
+        return (
+            <Card>
+                <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2">
+                    <Users className="h-6 w-6" />
+                    Followers
+                </CardTitle>
+                </CardHeader>
+                <CardContent>
+                <p className="text-sm text-muted-foreground text-center py-4">
+                    Unable to load followers. Please check your permissions.
+                </p>
                 </CardContent>
             </Card>
         )
@@ -185,18 +221,9 @@ function BadgeDetailContent() {
   
   const id = params.id as string;
   
-  // Add debugging
-  console.log('BadgeDetailContent: id =', id);
-  console.log('BadgeDetailContent: currentUser =', currentUser);
-  
   const badgeCol = collection(firestore, 'badges') as CollectionReference<Omit<BadgeType, 'id'>>;
   const badgeRef = doc(badgeCol, id);
   const { data: badge, loading: badgeLoading, error: badgeError } = useDoc<Omit<BadgeType, 'id'>>(badgeRef);
-  
-  // Add error logging
-  console.log('BadgeDetailContent: badge =', badge);
-  console.log('BadgeDetailContent: badgeLoading =', badgeLoading);
-  console.log('BadgeDetailContent: badgeError =', badgeError);
 
   const ownersRef = collection(firestore, `badges/${id}/owners`);
   const { data: owners, loading: ownersLoading } = useCollection(ownersRef);
@@ -227,14 +254,6 @@ function BadgeDetailContent() {
 
   // Only wait for essential data (auth, badge, creator) - don't block on owners/followers
   const isLoading = authLoading || badgeLoading || creatorLoading;
-  
-  // Add debugging for all loading states
-  console.log('BadgeDetailContent: authLoading =', authLoading);
-  console.log('BadgeDetailContent: badgeLoading =', badgeLoading);
-  console.log('BadgeDetailContent: ownersLoading =', ownersLoading);
-  console.log('BadgeDetailContent: followersLoading =', followersLoading);
-  console.log('BadgeDetailContent: creatorLoading =', creatorLoading);
-  console.log('BadgeDetailContent: isLoading =', isLoading);
 
   if (isLoading) {
       return (
@@ -255,7 +274,6 @@ function BadgeDetailContent() {
 
   // Add comprehensive error handling
   if (badgeError) {
-    console.error('BadgeDetailContent: Firestore error =', badgeError);
     return (
       <div className="flex-1 space-y-6 p-4 md:p-6">
         <Header title="Error Loading Badge" />
@@ -270,7 +288,6 @@ function BadgeDetailContent() {
   }
 
   if (!badgeLoading && !badge) {
-    console.log('BadgeDetailContent: Badge not found, id =', id);
     return (
       <div className="flex-1 space-y-6 p-4 md:p-6">
         <Header title="Badge Not Found" />
