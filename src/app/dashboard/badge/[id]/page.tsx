@@ -40,41 +40,47 @@ function BadgeOwners({ badgeId, creatorId }: { badgeId: string, creatorId: strin
     const { data: owners, loading, error } = useCollection(ownersRef);
     const [ownerProfiles, setOwnerProfiles] = useState<UserProfile[]>([]);
     const [loadingProfiles, setLoadingProfiles] = useState(true);
+    const [hasTimedOut, setHasTimedOut] = useState(false);
+
+    // Add timeout to prevent infinite loading
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (loading) {
+                setHasTimedOut(true);
+            }
+        }, 5000); // 5 second timeout
+
+        return () => clearTimeout(timer);
+    }, [loading]);
 
     useEffect(() => {
         if (!owners) return;
         
         const fetchProfiles = async () => {
             setLoadingProfiles(true);
-            const userIds = owners.map(o => o.userId);
-            if (userIds.length === 0) {
+            try {
+                const userIds = owners.map(o => o.userId);
+                if (userIds.length === 0) {
+                    setOwnerProfiles([]);
+                    setLoadingProfiles(false);
+                    return;
+                }
+                const usersRef = collection(firestore, 'users');
+                const q = query(usersRef, where('__name__', 'in', userIds));
+                const querySnapshot = await getDocs(q);
+                const profiles = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserProfile));
+                setOwnerProfiles(profiles);
+            } catch (err) {
+                console.error('Error fetching owner profiles:', err);
                 setOwnerProfiles([]);
+            } finally {
                 setLoadingProfiles(false);
-                return;
             }
-            const usersRef = collection(firestore, 'users');
-            const q = query(usersRef, where('__name__', 'in', userIds));
-            const querySnapshot = await getDocs(q);
-            const profiles = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserProfile));
-            setOwnerProfiles(profiles);
-            setLoadingProfiles(false);
         }
         fetchProfiles();
     }, [owners]);
 
-    if (loading || loadingProfiles) {
-        return (
-            <Card>
-                <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
-                <CardContent className="space-y-4">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                </CardContent>
-            </Card>
-        )
-    }
-
-    if (error) {
+    if (error || hasTimedOut) {
         return (
             <Card>
                 <CardHeader>
@@ -85,8 +91,20 @@ function BadgeOwners({ badgeId, creatorId }: { badgeId: string, creatorId: strin
                 </CardHeader>
                 <CardContent>
                     <p className="text-sm text-muted-foreground text-center py-4">
-                        Unable to load owners. Please check your permissions.
+                        Unable to load owners. {hasTimedOut ? 'Request timed out.' : 'Please check your permissions.'}
                     </p>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (loading || loadingProfiles) {
+        return (
+            <Card>
+                <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
+                <CardContent className="space-y-4">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
                 </CardContent>
             </Card>
         )
@@ -130,41 +148,48 @@ function BadgeFollowers({ badgeId }: { badgeId: string }) {
     const { data: followers, loading, error } = useCollection(followersRef);
     const [followerProfiles, setFollowerProfiles] = useState<UserProfile[]>([]);
     const [loadingProfiles, setLoadingProfiles] = useState(true);
+    const [hasTimedOut, setHasTimedOut] = useState(false);
+
+    // Add timeout to prevent infinite loading
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (loading) {
+                setHasTimedOut(true);
+            }
+        }, 5000); // 5 second timeout
+
+        return () => clearTimeout(timer);
+    }, [loading]);
 
      useEffect(() => {
         if (!followers) return;
         
         const fetchProfiles = async () => {
             setLoadingProfiles(true);
-            const userIds = followers.map(f => f.userId);
-            if (userIds.length === 0) {
+            try {
+                const userIds = followers.map(f => f.userId);
+                if (userIds.length === 0) {
+                    setFollowerProfiles([]);
+                    setLoadingProfiles(false);
+                    return;
+                }
+                const usersRef = collection(firestore, 'users');
+                const q = query(usersRef, where('__name__', 'in', userIds));
+                const querySnapshot = await getDocs(q);
+                const profiles = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserProfile));
+                setFollowerProfiles(profiles);
+            } catch (err) {
+                console.error('Error fetching follower profiles:', err);
                 setFollowerProfiles([]);
+            } finally {
                 setLoadingProfiles(false);
-                return;
             }
-            const usersRef = collection(firestore, 'users');
-            const q = query(usersRef, where('__name__', 'in', userIds));
-            const querySnapshot = await getDocs(q);
-            const profiles = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserProfile));
-            setFollowerProfiles(profiles);
-            setLoadingProfiles(false);
         }
         fetchProfiles();
     }, [followers]);
 
 
-    if (loading || loadingProfiles) {
-        return (
-            <Card>
-                <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
-                <CardContent className="space-y-4">
-                    <Skeleton className="h-12 w-full" />
-                </CardContent>
-            </Card>
-        )
-    }
-
-    if (error) {
+    if (error || hasTimedOut) {
         return (
             <Card>
                 <CardHeader>
@@ -175,8 +200,19 @@ function BadgeFollowers({ badgeId }: { badgeId: string }) {
                 </CardHeader>
                 <CardContent>
                 <p className="text-sm text-muted-foreground text-center py-4">
-                    Unable to load followers. Please check your permissions.
+                    Unable to load followers. {hasTimedOut ? 'Request timed out.' : 'Please check your permissions.'}
                 </p>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (loading || loadingProfiles) {
+        return (
+            <Card>
+                <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
+                <CardContent className="space-y-4">
+                    <Skeleton className="h-12 w-full" />
                 </CardContent>
             </Card>
         )
