@@ -226,6 +226,14 @@ function BadgeDetailContent() {
   }, [searchParams, badge, id]);
 
   const isLoading = authLoading || badgeLoading || ownersLoading || followersLoading || creatorLoading;
+  
+  // Add debugging for all loading states
+  console.log('BadgeDetailContent: authLoading =', authLoading);
+  console.log('BadgeDetailContent: badgeLoading =', badgeLoading);
+  console.log('BadgeDetailContent: ownersLoading =', ownersLoading);
+  console.log('BadgeDetailContent: followersLoading =', followersLoading);
+  console.log('BadgeDetailContent: creatorLoading =', creatorLoading);
+  console.log('BadgeDetailContent: isLoading =', isLoading);
 
   if (isLoading) {
       return (
