@@ -184,9 +184,19 @@ function BadgeDetailContent() {
   const { user: currentUser, loading: authLoading } = useUser();
   
   const id = params.id as string;
+  
+  // Add debugging
+  console.log('BadgeDetailContent: id =', id);
+  console.log('BadgeDetailContent: currentUser =', currentUser);
+  
   const badgeCol = collection(firestore, 'badges') as CollectionReference<Omit<BadgeType, 'id'>>;
   const badgeRef = doc(badgeCol, id);
-  const { data: badge, loading: badgeLoading } = useDoc<Omit<BadgeType, 'id'>>(badgeRef);
+  const { data: badge, loading: badgeLoading, error: badgeError } = useDoc<Omit<BadgeType, 'id'>>(badgeRef);
+  
+  // Add error logging
+  console.log('BadgeDetailContent: badge =', badge);
+  console.log('BadgeDetailContent: badgeLoading =', badgeLoading);
+  console.log('BadgeDetailContent: badgeError =', badgeError);
 
   const ownersRef = collection(firestore, `badges/${id}/owners`);
   const { data: owners, loading: ownersLoading } = useCollection(ownersRef);
@@ -234,13 +244,30 @@ function BadgeDetailContent() {
       )
   }
 
-  // Add error handling for missing badge
-  if (!badge) {
+  // Add comprehensive error handling
+  if (badgeError) {
+    console.error('BadgeDetailContent: Firestore error =', badgeError);
+    return (
+      <div className="flex-1 space-y-6 p-4 md:p-6">
+        <Header title="Error Loading Badge" />
+        <div className="text-center py-12">
+          <p className="text-muted-foreground mb-4">Error loading badge: {badgeError.message}</p>
+          <Button onClick={() => router.push('/dashboard')}>
+            Back to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!badgeLoading && !badge) {
+    console.log('BadgeDetailContent: Badge not found, id =', id);
     return (
       <div className="flex-1 space-y-6 p-4 md:p-6">
         <Header title="Badge Not Found" />
         <div className="text-center py-12">
           <p className="text-muted-foreground mb-4">This badge doesn't exist or has been deleted.</p>
+          <p className="text-sm text-muted-foreground mb-4">Badge ID: {id}</p>
           <Button onClick={() => router.push('/dashboard')}>
             Back to Dashboard
           </Button>

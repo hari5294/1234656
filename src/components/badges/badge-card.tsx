@@ -24,6 +24,11 @@ type BadgeCardProps = {
 
 export function BadgeCard({ badge }: BadgeCardProps) {
   const badgesLeft = badge.tokens - (badge.owners?.length || 0);
+  
+  // Add debugging
+  console.log('BadgeCard: badge =', badge);
+  console.log('BadgeCard: badge.id =', badge.id);
+  console.log('BadgeCard: link href =', `/dashboard/badge/${badge.id}?burst=true`);
 
   return (
     <Card className="flex flex-col transition-all hover:shadow-md">
