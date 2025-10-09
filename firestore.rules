@@ -30,9 +30,9 @@ service cloud.firestore {
       }
     }
 
-    // Share links can only be read/updated via the specific transaction that redeems them.
+    // Share links - allow read/write for authenticated users
     match /shareLinks/{linkId} {
-        allow read, write: if false; // Handled by backend logic/transactions
+        allow read, write: if request.auth != null;
     }
 
     // Users can only manage their own notifications.
