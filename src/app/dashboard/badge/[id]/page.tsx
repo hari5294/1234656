@@ -234,8 +234,19 @@ function BadgeDetailContent() {
       )
   }
 
+  // Add error handling for missing badge
   if (!badge) {
-    notFound();
+    return (
+      <div className="flex-1 space-y-6 p-4 md:p-6">
+        <Header title="Badge Not Found" />
+        <div className="text-center py-12">
+          <p className="text-muted-foreground mb-4">This badge doesn't exist or has been deleted.</p>
+          <Button onClick={() => router.push('/dashboard')}>
+            Back to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
   }
   
   const isCreator = currentUser && badge.creatorId === currentUser.uid;
