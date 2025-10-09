@@ -276,6 +276,18 @@ function BadgeDetailContent() {
     );
   }
   
+  // Ensure badge exists before accessing properties
+  if (!badge) {
+    return (
+      <div className="flex-1 space-y-6 p-4 md:p-6">
+        <Header title="Loading..." />
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading badge details...</p>
+        </div>
+      </div>
+    );
+  }
+  
   const isCreator = currentUser && badge.creatorId === currentUser.uid;
   const isOwner = currentUser && owners?.some(o => o.userId === currentUser.uid);
   const isFollowing = currentUser && followers?.some(f => f.userId === currentUser.uid);
